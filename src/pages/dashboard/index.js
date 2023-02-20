@@ -21,17 +21,19 @@ import StatisticsCard from 'src/views/dashboard/StatisticsCard'
 import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
 import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
 import SalesByCountries from 'src/views/dashboard/SalesByCountries'
+import Accountsetting from 'src/pages/account-settings'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 const Dashboard = () => {
   const router = useRouter()
-  useEffect(() => {
-    const token = localStorage.getItem('authenticated')
-    if (token !== null) {
-      router.push('/pages/login')
-    }
-  }, [])
+  // useEffect(() => {
+  //   const token = localStorage.getItem('authenticated')
+  //   if (token !== '') {
+  //     console.log(token)
+  //     router.push('/401')
+  //   }
+  // }, [])
   return (
     <ApexChartWrapper>
       <Grid container spacing={6}>
@@ -40,6 +42,9 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} md={8}>
           <StatisticsCard />
+        </Grid>
+        <Grid item xs={12}>
+          <Accountsetting />
         </Grid>
         <Grid item xs={12}>
           <Table />

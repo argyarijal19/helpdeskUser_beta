@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -20,6 +20,7 @@ import Button from '@mui/material/Button'
 
 // ** Icons Imports
 import Close from 'mdi-material-ui/Close'
+import axios from 'axios'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -49,46 +50,87 @@ const TabAccount = () => {
   // ** State
   const [openAlert, setOpenAlert] = useState(true)
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
+  const [perihal, setPerihal] = useState([]);
+  const [counter, setCounter] = useState(1)
+  const [department, setDepartment] = useState([])
+  const [idDepartment, setIdDepartment] = useState(0)
+  const [idPerihal, setIdPerihal] = useState(0)
+  const [jenisComplain, setJenisComplain] = useState([])
 
+  useEffect(() => {
+    const config = {
+      method: 'get',
+      url: 'https://helpdesk_backend.ulbi.ac.id/get_department',
+      headers: {  
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin':'*'
+      },
+    }
+    axios(config).then((response) => {
+      setDepartment(response.data.data)
+    })
+  },[])
+
+  const handleFirstChange = (event) => {
+    const value = event.target.value
+    setIdDepartment(value)
+
+    const configPerihal = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/get_apps_base?id_department=${value}`,
+      headers: {  
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin':'*'
+      },
+    }
+    axios(configPerihal).then((response) => {
+      setPerihal(response.data.data)
+    }).catch(err =>{
+      console.log(err)
+    })
+    setPerihal('')
+  }
+
+  const handleSecondChange = (event) =>{
+    const value = event.target.value
+    setIdPerihal(value)
+    console.log(value)
+    const configjenisTask = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/jt_byapp?id_aplikasi=${value}`,
+      headers: {  
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin':'*'
+      },
+    }
+    axios(configjenisTask).then((response) => {
+      setJenisComplain(response.data.data)
+    }).catch(err =>{
+      console.log(err)
+    })
+    setJenisComplain('')
+  }
   const onChange = file => {
+    const fileUpload = file.target.files[0];
     const reader = new FileReader()
     const { files } = file.target
     if (files && files.length !== 0) {
       reader.onload = () => setImgSrc(reader.result)
-      reader.readAsDataURL(files[0])
+      console.log(fileUpload[0])
+      reader.readAsDataURL(fileUpload)
     }
+  }
+  const handleAdd = () =>{
+    setCounter(counter + 1)
+    console.log(counter)
   }
 
   return (
     <CardContent>
       <form>
         <Grid container spacing={7}>
-          <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <ImgStyled src={imgSrc} alt='Profile Pic' />
-              <Box>
-                <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload New Photo
-                  <input
-                    hidden
-                    type='file'
-                    onChange={onChange}
-                    accept='image/png, image/jpeg'
-                    id='account-settings-upload-image'
-                  />
-                </ButtonStyled>
-                <ResetButtonStyled color='error' variant='outlined' onClick={() => setImgSrc('/images/avatars/1.png')}>
-                  Reset
-                </ResetButtonStyled>
-                <Typography variant='body2' sx={{ marginTop: 5 }}>
-                  Allowed PNG or JPEG. Max size of 800K.
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Username' placeholder='johnDoe' defaultValue='johnDoe' />
+            <TextField fullWidth label='Nama Lengkap' placeholder='johnDoe' disabled defaultValue='johnDoe' />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField fullWidth label='Name' placeholder='John Doe' defaultValue='John Doe' />
@@ -104,52 +146,80 @@ const TabAccount = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select label='Role' defaultValue='admin'>
-                <MenuItem value='admin'>Admin</MenuItem>
-                <MenuItem value='author'>Author</MenuItem>
-                <MenuItem value='editor'>Editor</MenuItem>
-                <MenuItem value='maintainer'>Maintainer</MenuItem>
-                <MenuItem value='subscriber'>Subscriber</MenuItem>
+              <InputLabel>Department</InputLabel>
+              <Select label='Department' defaultValue='' onChange={handleFirstChange}>
+                {
+                  department && department.length > 0 ?
+                  department.map((d) => (
+                    <MenuItem value={d.id_department}>{d.nama_department.toUpperCase()}</MenuItem>
+                  )):
+                  'None'
+                }
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select label='Status' defaultValue='active'>
-                <MenuItem value='active'>Active</MenuItem>
-                <MenuItem value='inactive'>Inactive</MenuItem>
-                <MenuItem value='pending'>Pending</MenuItem>
+              <InputLabel>Keluhan</InputLabel>
+              <Select label='Keluhan' defaultValue='active' onChange={handleSecondChange}>
+                {
+                  perihal && perihal.length > 0 ?
+                  perihal.map((p) => (
+                    <MenuItem value={p.id_aplikasi}>{p.nama_aplikasi}</MenuItem>
+                    )):
+                    <MenuItem value=''>Pilih Department</MenuItem>
+                }
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Company' placeholder='ABC Pvt. Ltd.' defaultValue='ABC Pvt. Ltd.' />
-          </Grid>
-
-          {openAlert ? (
-            <Grid item xs={12} sx={{ mb: 3 }}>
-              <Alert
-                severity='warning'
-                sx={{ '& a': { fontWeight: 400 } }}
-                action={
-                  <IconButton size='small' color='inherit' aria-label='close' onClick={() => setOpenAlert(false)}>
-                    <Close fontSize='inherit' />
-                  </IconButton>
+            <FormControl fullWidth>
+              <InputLabel>Perihal</InputLabel>
+              <Select label='Keluhan' defaultValue='active'>
+                {
+                  jenisComplain && jenisComplain.length > 0 ?
+                  jenisComplain.map((jc) => (
+                    <MenuItem value={jc.id_jenis_task}>{jc.jenis_task}</MenuItem>
+                    )) :
+                  <MenuItem value=''>Pilih Keluhan</MenuItem>
                 }
-              >
-                <AlertTitle>Your email is not confirmed. Please check your inbox.</AlertTitle>
-                <Link href='/' onClick={e => e.preventDefault()}>
-                  Resend Confirmation
-                </Link>
-              </Alert>
-            </Grid>
-          ) : null}
-
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
+            {Array.from(Array(counter)).map((c,index) =>{
+              return <Box p={5} key={c} sx={{ display: 'flex', alignItems: 'center' }}>
+              <ImgStyled src={imgSrc} alt='Profile Pic' />
+              <Box>
+                <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
+                  Upload Attachment
+                  <input
+                    hidden
+                    type='file'
+                    onChange={onChange}
+                    accept='image/png, image/jpeg'
+                    id='account-settings-upload-image'
+                  />
+                </ButtonStyled>
+                <ResetButtonStyled color='error' variant='outlined' onClick={() => setImgSrc('/images/avatars/1.png')}>
+                  Reset
+                </ResetButtonStyled>
+                <Typography variant='body2' sx={{ marginTop: 5 }}>
+                  Allowed PNG or JPEG. Max size of 800K.
+                </Typography>
+              </Box>
+              <ResetButtonStyled color='primary' variant='outlined' onClick={() => setCounter(counter - 1)}>
+                -
+              </ResetButtonStyled>
+            </Box>
+            })}
+            <ResetButtonStyled color='primary' variant='outlined' onClick={handleAdd}>
+                +
+            </ResetButtonStyled>
+          </Grid>
           <Grid item xs={12}>
             <Button variant='contained' sx={{ marginRight: 3.5 }}>
-              Save Changes
+              Submit
             </Button>
             <Button type='reset' variant='outlined' color='secondary'>
               Reset

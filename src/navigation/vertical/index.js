@@ -15,7 +15,7 @@ const navigation = () => {
     {
       title: 'Dashboard',
       icon: HomeOutline,
-      path: '/'
+      path: '/dashboard'
     },
     {
       title: 'Account Settings',
@@ -29,12 +29,6 @@ const navigation = () => {
       title: 'Login',
       icon: Login,
       path: '/pages/login',
-      openInNewTab: true
-    },
-    {
-      title: 'Register',
-      icon: AccountPlusOutline,
-      path: '/pages/register',
       openInNewTab: true
     },
     {

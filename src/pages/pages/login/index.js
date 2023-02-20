@@ -1,5 +1,8 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+// import { gapi } from 'gapi-script'
+import { load } from 'gapi-script';
+import { useGoogleLogin } from 'react-google-login';
 
 // ** Next Imports
 import Link from 'next/link'
@@ -39,6 +42,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
+
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '28rem' }
@@ -58,7 +62,43 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
-  // ** State
+  const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
+  const onSuccess = (response) => console.log(response);
+  const onFailure = (response) => console.log(response);
+  // useEffect(() => {
+  //   const initClient = () => {
+  //     gapi.auth2.init({
+  //       clientId: clientId,
+  //       scope: ''
+  //     });
+  //   };
+  //   gapi.load('client:auth2', initClient);
+
+  // },[])
+  useEffect(() => {
+    window.gapi.load('auth2', () => {
+      window.gapi.auth2
+        .init({
+          client_id: clientId,
+          scope: 'email',
+          fetch_basic_profile: true,
+        })
+        .then((auth) => {
+          setAuth(auth);
+          setIsSignedIn(auth.isSignedIn.get());
+        });
+    });
+  }, []);
+    const { signIn } = useGoogleLogin({
+      clientId,
+      onSuccess,
+      onFailure,
+      isSignedIn: false,
+      uxMode: 'redirect',
+      accessType: 'offline',
+      cookiePolicy: 'single_host_origin',
+    });
+
   const [values, setValues] = useState({
     password: '',
     showPassword: false
@@ -200,7 +240,6 @@ const LoginPage = () => {
               size='large'
               variant='contained'
               sx={{ marginBottom: 7 }}
-              onClick={() => router.push('/dashboard')}
             >
               Login
             </Button>
@@ -234,7 +273,7 @@ const LoginPage = () => {
                 </IconButton>
               </Link>
               <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
+                <IconButton component='a' onClick={signIn}>
                   <Google sx={{ color: '#db4437' }} />
                 </IconButton>
               </Link>

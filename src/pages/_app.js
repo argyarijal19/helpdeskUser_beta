@@ -1,5 +1,6 @@
 // ** Next Imports
 import Head from 'next/head'
+import Script from 'next/script';
 import { Router } from 'next/router'
 
 // ** Loader Import
@@ -59,6 +60,10 @@ const App = props => {
         />
         <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
+        <Script
+          strategy="beforeInteractive"
+          src="https://apis.google.com/js/api.js"
+        />
       </Head>
 
       <SettingsProvider>
