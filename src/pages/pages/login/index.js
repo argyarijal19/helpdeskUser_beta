@@ -1,8 +1,5 @@
 // ** React Imports
 import { useEffect, useState } from 'react'
-// import { gapi } from 'gapi-script'
-import { load } from 'gapi-script';
-import { useGoogleLogin } from 'react-google-login';
 
 // ** Next Imports
 import Link from 'next/link'
@@ -26,6 +23,9 @@ import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 
 // ** Icons Imports
+// import SocialLogin from 'reactjs-social-login';
+// import { LoginSocialGoogle } from 'reactjs-social-login'
+import dynamic from 'next/dynamic'
 import Google from 'mdi-material-ui/Google'
 import Github from 'mdi-material-ui/Github'
 import Twitter from 'mdi-material-ui/Twitter'
@@ -41,7 +41,6 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
-
 
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -65,39 +64,6 @@ const LoginPage = () => {
   const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
   const onSuccess = (response) => console.log(response);
   const onFailure = (response) => console.log(response);
-  // useEffect(() => {
-  //   const initClient = () => {
-  //     gapi.auth2.init({
-  //       clientId: clientId,
-  //       scope: ''
-  //     });
-  //   };
-  //   gapi.load('client:auth2', initClient);
-
-  // },[])
-  useEffect(() => {
-    window.gapi.load('auth2', () => {
-      window.gapi.auth2
-        .init({
-          client_id: clientId,
-          scope: 'email',
-          fetch_basic_profile: true,
-        })
-        .then((auth) => {
-          setAuth(auth);
-          setIsSignedIn(auth.isSignedIn.get());
-        });
-    });
-  }, []);
-    const { signIn } = useGoogleLogin({
-      clientId,
-      onSuccess,
-      onFailure,
-      isSignedIn: false,
-      uxMode: 'redirect',
-      accessType: 'offline',
-      cookiePolicy: 'single_host_origin',
-    });
 
   const [values, setValues] = useState({
     password: '',
@@ -273,7 +239,7 @@ const LoginPage = () => {
                 </IconButton>
               </Link>
               <Link href='/' passHref>
-                <IconButton component='a' onClick={signIn}>
+                <IconButton component='a'>
                   <Google sx={{ color: '#db4437' }} />
                 </IconButton>
               </Link>
