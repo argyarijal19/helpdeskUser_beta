@@ -10,7 +10,17 @@ import AccountPlusOutline from 'mdi-material-ui/AccountPlusOutline'
 import AlertCircleOutline from 'mdi-material-ui/AlertCircleOutline'
 import GoogleCirclesExtended from 'mdi-material-ui/GoogleCirclesExtended'
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/router'
+
 const navigation = () => {
+  const router = useRouter()
+  useEffect(() => {
+    const token = localStorage.getItem('auth')
+    if(!token){
+      router.push('/401')
+    }
+  },[])
   return [
     {
       title: 'Dashboard',

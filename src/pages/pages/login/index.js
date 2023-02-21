@@ -23,8 +23,10 @@ import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 
 // ** Icons Imports
-// import SocialLogin from 'reactjs-social-login';
-// import { LoginSocialGoogle } from 'reactjs-social-login'
+// import {LoginSocialGoogle} from 'reactjs-social-login';
+
+
+// import LoginSocialGoogle from './socialLogin'
 import dynamic from 'next/dynamic'
 import Google from 'mdi-material-ui/Google'
 import Github from 'mdi-material-ui/Github'
@@ -42,6 +44,10 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
 
+const SocialLoginButton = dynamic(
+  () => import('./socialLogin'),
+  { ssr: false }
+);
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '28rem' }
@@ -61,9 +67,7 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
-  const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
-  const onSuccess = (response) => console.log(response);
-  const onFailure = (response) => console.log(response);
+  
 
   const [values, setValues] = useState({
     password: '',
@@ -201,14 +205,7 @@ const LoginPage = () => {
                 <LinkStyled onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
               </Link>
             </Box>
-            <Button
-              fullWidth
-              size='large'
-              variant='contained'
-              sx={{ marginBottom: 7 }}
-            >
-              Login
-            </Button>
+            <SocialLoginButton />
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ marginRight: 2 }}>
                 New on our platform?
