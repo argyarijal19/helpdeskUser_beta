@@ -1,5 +1,6 @@
 // ** React Imports
 import { useEffect, useState } from 'react'
+import jwt_decode from 'jwt-decode'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -8,6 +9,7 @@ import Link from '@mui/material/Link'
 import Alert from '@mui/material/Alert'
 import Select from '@mui/material/Select'
 import { styled } from '@mui/material/styles'
+import TabList from '@mui/lab/TabList'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -17,6 +19,7 @@ import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
+import MuiTab from '@mui/material/Tab'
 
 // ** Icons Imports
 import Close from 'mdi-material-ui/Close'
@@ -56,19 +59,47 @@ const TabAccount = () => {
   const [idDepartment, setIdDepartment] = useState(0)
   const [idPerihal, setIdPerihal] = useState(0)
   const [jenisComplain, setJenisComplain] = useState([])
+  const [namaLengkap, setNamaLengkap] = useState('')
+  const [jabatan, setjabatan] = useState('')
+  const [idUser,setIdUser] = useState('')
 
   useEffect(() => {
-    const config = {
-      method: 'get',
-      url: 'https://helpdesk_backend.ulbi.ac.id/get_department',
-      headers: {  
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin':'*'
-      },
+    const token = localStorage.getItem('auth')
+    if(!token){
+      const router = useRouter()
+      router.push('/401')
+    }else{
+      const decode = jwt_decode(token)
+      const baseData = JSON.parse(decode.sub)
+      setNamaLengkap(baseData.nama_lengkap)
+      setIdUser(baseData.id_user)
+      const config = {
+        method: 'get',
+        url: 'https://helpdesk_backend.ulbi.ac.id/get_department',
+        headers: {  
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin':'*'
+        },
+      }
+      axios(config).then((response) => {
+        setDepartment(response.data.data)
+      })
+      var configJabatan = {
+        method: 'get',
+        url: `https://helpdesk_backend.ulbi.ac.id/id_jabatan/${baseData.id_jabatan}`,
+        headers: { 
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json'
+        }
+      };
+      axios(configJabatan)
+      .then(function (response) {
+        setjabatan(response.data.data[0].nama_jabatan)
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     }
-    axios(config).then((response) => {
-      setDepartment(response.data.data)
-    })
   },[])
 
   const handleFirstChange = (event) => {
@@ -125,28 +156,50 @@ const TabAccount = () => {
     console.log(counter)
   }
 
+  const Tab = styled(MuiTab)(({ theme }) => ({
+    [theme.breakpoints.down('md')]: {
+      minWidth: 100
+    },
+    [theme.breakpoints.down('sm')]: {
+      minWidth: 67
+    }
+  }))
+  
+  const TabName = styled('span')(({ theme }) => ({
+    lineHeight: 1.71,
+    fontSize: '0.875rem',
+    marginLeft: theme.spacing(2.4),
+    [theme.breakpoints.down('md')]: {
+      display: 'none'
+    }
+  }))
+  
+
   return (
     <CardContent>
       <form>
         <Grid container spacing={7}>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Nama Lengkap' placeholder='johnDoe' disabled defaultValue='johnDoe' />
+            <InputLabel>ID USER</InputLabel>
+            <TextField fullWidth label={idUser} defaultValue={idUser} disabled inputProps={{ readOnly: true }} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Name' placeholder='John Doe' defaultValue='John Doe' />
+            <InputLabel>NAMA LENGKAP</InputLabel>
+            <TextField fullWidth label={namaLengkap} disabled InputProps={{ readOnly: true }} defaultValue={namaLengkap} />
           </Grid>
           <Grid item xs={12} sm={6}>
+          <InputLabel>JABATAN</InputLabel>
             <TextField
               fullWidth
-              type='email'
-              label='Email'
-              placeholder='johnDoe@example.com'
-              defaultValue='johnDoe@example.com'
+              disabled
+              InputProps={{ readOnly: true }}
+              label={jabatan}
+              defaultValue={jabatan}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
+            <InputLabel>DEPARTMENT</InputLabel>
             <FormControl fullWidth>
-              <InputLabel>Department</InputLabel>
               <Select label='Department' defaultValue='' onChange={handleFirstChange}>
                 {
                   department && department.length > 0 ?
@@ -159,9 +212,9 @@ const TabAccount = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
+            <InputLabel>KELUHAN</InputLabel>
             <FormControl fullWidth>
-              <InputLabel>Keluhan</InputLabel>
-              <Select label='Keluhan' defaultValue='active' onChange={handleSecondChange}>
+              <Select defaultValue='active' onChange={handleSecondChange}>
                 {
                   perihal && perihal.length > 0 ?
                   perihal.map((p) => (
@@ -173,8 +226,8 @@ const TabAccount = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
+            <InputLabel>PERIHAL</InputLabel>
             <FormControl fullWidth>
-              <InputLabel>Perihal</InputLabel>
               <Select label='Keluhan' defaultValue='active'>
                 {
                   jenisComplain && jenisComplain.length > 0 ?
@@ -187,6 +240,19 @@ const TabAccount = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
+            <TabList
+            aria-label='account-settings tabs'
+            sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
+          >
+            <Tab
+              value='account'
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TabName>Upload Attachment</TabName>
+                </Box>
+              }
+            />
+          </TabList>
             {Array.from(Array(counter)).map((c,index) =>{
               return <Box p={5} key={c} sx={{ display: 'flex', alignItems: 'center' }}>
               <ImgStyled src={imgSrc} alt='Profile Pic' />

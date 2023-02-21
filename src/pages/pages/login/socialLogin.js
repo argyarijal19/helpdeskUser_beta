@@ -9,7 +9,8 @@ const ButtonLogin = () => {
   const router = useRouter()
     const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
     const onSuccess = (response) => {
-      console.log(response.data.email)
+      console.log(response)
+      const picture = response.data.picture
       var data = {
         "email": response.data.email
       };
@@ -27,6 +28,7 @@ const ButtonLogin = () => {
         const token = response.data.token
         if(status === 1){
           localStorage.setItem('auth', token)
+          localStorage.setItem('picture', picture)
           router.push('/dashboard')
         }else{
           const message = response.data.message
