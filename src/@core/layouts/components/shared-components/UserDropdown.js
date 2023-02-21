@@ -1,8 +1,9 @@
 // ** React Imports
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
+import jwt_decode from 'jwt-decode'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -33,6 +34,15 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 }))
 
 const UserDropdown = () => {
+  const [namaLengkap, setNamaLengkap] = useState('')
+  const [jabatan, setJabatan] = useState('')
+  useEffect(() => {
+    const token = localStorage.getItem('auth')
+    const decode = jwt_decode(token)
+    const baseData = JSON.parse(decode.sub)
+    console.log(baseData)
+    setNamaLengkap(baseData.nama_lengkap)
+  },[])
   // ** States
   const [anchorEl, setAnchorEl] = useState(null)
 
@@ -98,7 +108,7 @@ const UserDropdown = () => {
               <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{namaLengkap}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
                 Admin
               </Typography>
