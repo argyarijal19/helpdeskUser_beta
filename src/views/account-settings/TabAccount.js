@@ -20,10 +20,16 @@ import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
 import MuiTab from '@mui/material/Tab'
+import MessageOutline from 'mdi-material-ui/MessageOutline'
+
+import InputAdornment from '@mui/material/InputAdornment'
+// import Tiptap from '../../@core/layouts/components/Tiptap'
+import dynamic from 'next/dynamic'
 
 // ** Icons Imports
 import Close from 'mdi-material-ui/Close'
 import axios from 'axios'
+import { Card } from '@mui/material'
 
 const ImgStyled = styled('img')(({ theme }) => ({
   width: 120,
@@ -62,6 +68,7 @@ const TabAccount = () => {
   const [namaLengkap, setNamaLengkap] = useState('')
   const [jabatan, setjabatan] = useState('')
   const [idUser,setIdUser] = useState('')
+  const [keterangan, setKeterangan] = useState('')
 
   useEffect(() => {
     const token = localStorage.getItem('auth')
@@ -147,7 +154,7 @@ const TabAccount = () => {
     const { files } = file.target
     if (files && files.length !== 0) {
       reader.onload = () => setImgSrc(reader.result)
-      console.log(fileUpload[0])
+      console.log(fileUpload)
       reader.readAsDataURL(fileUpload)
     }
   }
@@ -174,6 +181,11 @@ const TabAccount = () => {
     }
   }))
   
+  const handleSave = () => {
+    const content = convertToRaw(editorState.getCurrentContent());
+    console.log(editorState.getCurrentContent())
+    // simpan content ke database atau kirim ke server
+  };
 
   return (
     <CardContent>
@@ -237,13 +249,32 @@ const TabAccount = () => {
                   <MenuItem value=''>Pilih Keluhan</MenuItem>
                 }
               </Select>
-            </FormControl>
+            </FormControl>            
+          </Grid>
+          <Grid item xs={12}>
+            <InputLabel>DETAIL COMPLAIN</InputLabel>
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              placeholder='Silahkan tulis detail complain seperti : npm, nidn, nama grup kelas dan lain lain...'
+              sx={{ '& .MuiOutlinedInput-root': { alignItems: 'baseline' } }}
+              onChange={(e) => setKeterangan(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <MessageOutline />
+                  </InputAdornment>
+                )
+              }}
+            />
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
             <TabList
             aria-label='account-settings tabs'
             sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
           >
+            
             <Tab
               value='account'
               label={
@@ -284,7 +315,7 @@ const TabAccount = () => {
             </ResetButtonStyled>
           </Grid>
           <Grid item xs={12}>
-            <Button variant='contained' sx={{ marginRight: 3.5 }}>
+            <Button variant='contained' sx={{ marginRight: 3.5 }} onClick={handleSave}>
               Submit
             </Button>
             <Button type='reset' variant='outlined' color='secondary'>

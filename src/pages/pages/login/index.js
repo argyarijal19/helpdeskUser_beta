@@ -51,8 +51,6 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
-  
-
   const [values, setValues] = useState({
     password: '',
     showPassword: false
@@ -62,17 +60,7 @@ const LoginPage = () => {
   const theme = useTheme()
   const router = useRouter()
 
-  const handleChange = prop => event => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
 
-  const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword })
-  }
-
-  const handleMouseDownPassword = event => {
-    event.preventDefault()
-  }
 
   return (
     <Box className='content-center'>

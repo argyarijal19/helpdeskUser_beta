@@ -9,118 +9,86 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import Typography from '@mui/material/Typography'
 import TableContainer from '@mui/material/TableContainer'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import jwt_decode from 'jwt-decode'
 
-const rows = [
-  {
-    age: 27,
-    status: 'current',
-    date: '09/27/2018',
-    name: 'Sally Quinn',
-    salary: '$19586.23',
-    email: 'eebsworth2m@sbwire.com',
-    designation: 'Human Resources Assistant'
-  },
-  {
-    age: 61,
-    date: '09/23/2016',
-    salary: '$23896.35',
-    status: 'professional',
-    name: 'Margaret Bowers',
-    email: 'kocrevy0@thetimes.co.uk',
-    designation: 'Nuclear Power Engineer'
-  },
-  {
-    age: 59,
-    date: '10/15/2017',
-    name: 'Minnie Roy',
-    status: 'rejected',
-    salary: '$18991.67',
-    email: 'ediehn6@163.com',
-    designation: 'Environmental Specialist'
-  },
-  {
-    age: 30,
-    date: '06/12/2018',
-    status: 'resigned',
-    salary: '$19252.12',
-    name: 'Ralph Leonard',
-    email: 'dfalloona@ifeng.com',
-    designation: 'Sales Representative'
-  },
-  {
-    age: 66,
-    status: 'applied',
-    date: '03/24/2018',
-    salary: '$13076.28',
-    name: 'Annie Martin',
-    designation: 'Operator',
-    email: 'sganderton2@tuttocitta.it'
-  },
-  {
-    age: 33,
-    date: '08/25/2017',
-    salary: '$10909.52',
-    name: 'Adeline Day',
-    status: 'professional',
-    email: 'hnisius4@gnu.org',
-    designation: 'Senior Cost Accountant'
-  },
-  {
-    age: 61,
-    status: 'current',
-    date: '06/01/2017',
-    salary: '$17803.80',
-    name: 'Lora Jackson',
-    designation: 'Geologist',
-    email: 'ghoneywood5@narod.ru'
-  },
-  {
-    age: 22,
-    date: '12/03/2017',
-    salary: '$12336.17',
-    name: 'Rodney Sharp',
-    status: 'professional',
-    designation: 'Cost Accountant',
-    email: 'dcrossman3@google.co.jp'
-  }
-]
 
-const statusObj = {
-  applied: { color: 'info' },
-  rejected: { color: 'error' },
-  current: { color: 'primary' },
-  resigned: { color: 'warning' },
-  professional: { color: 'success' }
-}
+
 
 const DashboardTable = () => {
+  const [data, setData] = useState([])
+  useEffect(() => {
+    const token = localStorage.getItem('auth')
+    const decode = jwt_decode(token)
+    const baseData = JSON.parse(decode.sub)
+    const config = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/all_task_byuser?id_user=${baseData.id_user}`,
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(config).then((response) => {
+      setData(response.data.data)
+    }).catch((err) => {
+      console.log(err)
+    })
+  },[])
+  const rows = [
+    data && data.length > 0 ? data.map((m) => (
+      {
+        perihal: 27,
+        status: 'current',
+        dateInput: '09/27/2018',
+        keluhan: 'Sally Quinn',
+        staff: '$19586.23',
+        deadline: 'eebsworth2m@sbwire.com',
+      }
+    )):
+    {
+      perihal: 'tidak ada',
+      status: 'none',
+      dateInput: 'tidak ada',
+      keluhan: 'tidak ada',
+      staff: 'tidak ada',
+      deadline: 'tidak ada',
+    }
+  ]
+  
+  const statusObj = {
+    menunggu: { color: 'error' },
+    none: { color: 'warning' },
+    process: { color: 'success' }
+  }
+  console.log(rows)
   return (
     <Card>
       <TableContainer>
         <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Salary</TableCell>
-              <TableCell>Age</TableCell>
+              <TableCell>Keluhan</TableCell>
+              <TableCell>Perihal</TableCell>
+              <TableCell>Tanggan Input</TableCell>
+              <TableCell>Staff</TableCell>
+              <TableCell>Deadline</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map(row => (
-              <TableRow hover key={row.name} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+              <TableRow hover key={row.keluhan} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
                 <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.name}</Typography>
-                    <Typography variant='caption'>{row.designation}</Typography>
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.keluhan}</Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{row.email}</TableCell>
-                <TableCell>{row.date}</TableCell>
-                <TableCell>{row.salary}</TableCell>
-                <TableCell>{row.age}</TableCell>
+                <TableCell>{row.perihal}</TableCell>
+                <TableCell>{row.dateInput}</TableCell>
+                <TableCell>{row.staff}</TableCell>
+                <TableCell>{row.deadline}</TableCell>
                 <TableCell>
                   <Chip
                     label={row.status}

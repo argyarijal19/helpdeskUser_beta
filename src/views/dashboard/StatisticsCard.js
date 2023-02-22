@@ -9,41 +9,100 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 
 // ** Icons Imports
-import TrendingUp from 'mdi-material-ui/TrendingUp'
-import CurrencyUsd from 'mdi-material-ui/CurrencyUsd'
+import AccountEditOutline from 'mdi-material-ui/AccountEditOutline'
+import AccountDetails from 'mdi-material-ui/AccountDetails'
 import DotsVertical from 'mdi-material-ui/DotsVertical'
-import CellphoneLink from 'mdi-material-ui/CellphoneLink'
-import AccountOutline from 'mdi-material-ui/AccountOutline'
+import AccountCheckOutline from 'mdi-material-ui/AccountCheckOutline'
+import AccountClockOutline from 'mdi-material-ui/AccountClockOutline'
 
-const salesData = [
-  {
-    stats: '245k',
-    title: 'Sales',
-    color: 'primary',
-    icon: <TrendingUp sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '12.5k',
-    title: 'Customers',
-    color: 'success',
-    icon: <AccountOutline sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '1.54k',
-    color: 'warning',
-    title: 'Products',
-    icon: <CellphoneLink sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '$88k',
-    color: 'info',
-    title: 'Revenue',
-    icon: <CurrencyUsd sx={{ fontSize: '1.75rem' }} />
-  }
-]
+// data 
+import axios from 'axios'
+import jwt_decode from 'jwt-decode'
+import { useEffect, useState } from 'react'
+
+
 
 const renderStats = () => {
-  return salesData.map((item, index) => (
+  const [inProgress, setInProgress] = useState(0);
+  const [inQueue, setInQueue] = useState(0)
+  const [done, setDone] = useState(0)
+  const [total, setTotal] = useState(0)
+  useEffect(() => {
+    const token = localStorage.getItem('auth')
+    const decode = jwt_decode(token)
+    const baseData = JSON.parse(decode.sub)
+    console.log(baseData.id_user)
+    const configProgress = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/all_task_byuser_ws?id_user=${baseData.id_user}`,
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(configProgress).then((response) => {
+      const data = response.data.data
+      if (data !== null){
+        setInProgress(data.length)
+      }
+    })
+    const configQueue = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/all_task_byuser_ns?id_user=${baseData.id_user}`,
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(configQueue).then((response) => {
+      const data = response.data.data
+      if (data !== null){
+        setInQueue(data.length)
+      }
+    })
+    const configDone = {
+      method: 'get',
+      url: `https://helpdesk_backend.ulbi.ac.id/all_task_byuser_tsdone?id_user=${baseData.id_user}`,
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      },
+    }
+    axios(configDone).then((response) => {
+      const data = response.data.data
+      if (data !== null){
+        setDone(data.length)
+      }
+    })
+    setTotal(done + inProgress + inQueue)
+  })
+  const complainData = [
+    {
+      stats: inProgress,
+      title: 'Dalam Proses',
+      color: 'primary',
+      icon: <AccountEditOutline sx={{ fontSize: '1.75rem' }} />
+    },
+    {
+      stats: inQueue,
+      title: 'Dalam Antrian',
+      color: 'error',
+      icon: <AccountClockOutline sx={{ fontSize: '1.75rem' }} />
+    },
+    {
+      stats: done,
+      color: 'success',
+      title: 'Selesai',
+      icon: <AccountCheckOutline sx={{ fontSize: '1.75rem' }} />
+    },
+    {
+      stats: total,
+      color: 'info',
+      title: 'Total Complain',
+      icon: <AccountDetails sx={{ fontSize: '1.75rem' }} />
+    }
+  ]
+  return complainData.map((item, index) => (
     <Grid item xs={12} sm={3} key={index}>
       <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
         <Avatar
@@ -72,18 +131,13 @@ const StatisticsCard = () => {
   return (
     <Card>
       <CardHeader
-        title='Statistics Card'
-        action={
-          <IconButton size='small' aria-label='settings' className='card-more-options' sx={{ color: 'text.secondary' }}>
-            <DotsVertical />
-          </IconButton>
-        }
+        title='Detail Jumlah Complian'
         subheader={
           <Typography variant='body2'>
             <Box component='span' sx={{ fontWeight: 600, color: 'text.primary' }}>
-              Total 48.5% growth
+              Detail Jumlah Complain
             </Box>{' '}
-            😎 this month
+            Keseluruhan
           </Typography>
         }
         titleTypographyProps={{

@@ -28,53 +28,10 @@ const navigation = () => {
       path: '/dashboard'
     },
     {
-      title: 'Account Settings',
-      icon: AccountCogOutline,
-      path: '/account-settings'
-    },
-    {
-      sectionTitle: 'Pages'
-    },
-    {
-      title: 'Login',
-      icon: Login,
-      path: '/pages/login',
-      openInNewTab: true
-    },
-    {
-      title: 'Error',
-      icon: AlertCircleOutline,
-      path: '/pages/error',
-      openInNewTab: true
-    },
-    {
-      sectionTitle: 'User Interface'
-    },
-    {
-      title: 'Typography',
-      icon: FormatLetterCase,
-      path: '/typography'
-    },
-    {
-      title: 'Icons',
-      path: '/icons',
-      icon: GoogleCirclesExtended
-    },
-    {
-      title: 'Cards',
-      icon: CreditCardOutline,
-      path: '/cards'
-    },
-    {
-      title: 'Tables',
+      title: 'Riwayat Complan',
       icon: Table,
       path: '/tables'
     },
-    {
-      icon: CubeOutline,
-      title: 'Form Layouts',
-      path: '/form-layouts'
-    }
   ]
 }
 
