@@ -62,7 +62,6 @@ const DashboardTable = () => {
     none: { color: 'warning' },
     process: { color: 'success' }
   }
-  console.log(rows)
   return (
     <Card>
       <TableContainer>

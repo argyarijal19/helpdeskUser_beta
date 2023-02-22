@@ -21,6 +21,7 @@ import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
 import MuiTab from '@mui/material/Tab'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
+import Swal from 'sweetalert2'
 
 import InputAdornment from '@mui/material/InputAdornment'
 // import Tiptap from '../../@core/layouts/components/Tiptap'
@@ -65,10 +66,12 @@ const TabAccount = () => {
   const [idDepartment, setIdDepartment] = useState(0)
   const [idPerihal, setIdPerihal] = useState(0)
   const [jenisComplain, setJenisComplain] = useState([])
+  const [idJenisComplain, setIdJenisComplain] = useState(0)
   const [namaLengkap, setNamaLengkap] = useState('')
   const [jabatan, setjabatan] = useState('')
   const [idUser,setIdUser] = useState('')
   const [keterangan, setKeterangan] = useState('')
+  const [priority, setPriority] = useState(0)
 
   useEffect(() => {
     const token = localStorage.getItem('auth')
@@ -181,10 +184,57 @@ const TabAccount = () => {
     }
   }))
   
-  const handleSave = () => {
-    const content = convertToRaw(editorState.getCurrentContent());
-    console.log(editorState.getCurrentContent())
+  const handleSave = (e) => {
+    e.preventDefault()
+    const token = localStorage.getItem('auth')
+    const decode = jwt_decode(token)
+    const baseData = JSON.parse(decode.sub)
+    console.log(keterangan)
     // simpan content ke database atau kirim ke server
+    if (keterangan === '' || idDepartment == 0 || idJenisComplain === 0 || idPerihal === 0 || priority === 0){
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Form Masih ada yang kosong',
+      })
+    }
+    var data = {
+      "id_user_comp": baseData.id_user,
+      "id_aplikasi": idPerihal,
+      "id_jabatan": baseData.id_jabatan,
+      "id_jenis_task": idJenisComplain,
+      "id_department": idDepartment,
+      "priority": priority,
+      "keterangan": keterangan
+    };
+    console.log(data)
+    
+    var config = {
+      method: 'post',
+      url: 'https://helpdesk_backend.ulbi.ac.id/post_task',
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      },
+      data : data
+    };
+    
+    axios(config)
+    .then(function (response) {
+      const cek = response.data.status;
+      if (cek === 1){
+        Swal.fire({
+          icon: 'success',
+          title: 'okeey...',
+          text: response.data.message,
+        })
+      }else{
+        console.log(response)
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
   };
 
   return (
@@ -192,27 +242,27 @@ const TabAccount = () => {
       <form>
         <Grid container spacing={7}>
           <Grid item xs={12} sm={6}>
-            <InputLabel>ID USER</InputLabel>
-            <TextField fullWidth label={idUser} defaultValue={idUser} disabled inputProps={{ readOnly: true }} />
+            <InputLabel>NAMA JABATAN</InputLabel>
+            <TextField fullWidth label={jabatan} defaultValue={jabatan} disabled inputProps={{ readOnly: true }} />
           </Grid>
           <Grid item xs={12} sm={6}>
             <InputLabel>NAMA LENGKAP</InputLabel>
             <TextField fullWidth label={namaLengkap} disabled InputProps={{ readOnly: true }} defaultValue={namaLengkap} />
           </Grid>
           <Grid item xs={12} sm={6}>
-          <InputLabel>JABATAN</InputLabel>
-            <TextField
-              fullWidth
-              disabled
-              InputProps={{ readOnly: true }}
-              label={jabatan}
-              defaultValue={jabatan}
-            />
+          <InputLabel>PRIORITAS</InputLabel>
+            <FormControl fullWidth>
+              <Select label='Department' defaultValue='' required onChange={(e) => setPriority(e.target.value)}>
+                  <MenuItem value={2}>Low</MenuItem>
+                  <MenuItem value={4}>Medium</MenuItem>
+                  <MenuItem value={6}>High</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <InputLabel>DEPARTMENT</InputLabel>
             <FormControl fullWidth>
-              <Select label='Department' defaultValue='' onChange={handleFirstChange}>
+              <Select label='Department' defaultValue='' required onChange={handleFirstChange}>
                 {
                   department && department.length > 0 ?
                   department.map((d) => (
@@ -226,7 +276,7 @@ const TabAccount = () => {
           <Grid item xs={12} sm={6}>
             <InputLabel>KELUHAN</InputLabel>
             <FormControl fullWidth>
-              <Select defaultValue='active' onChange={handleSecondChange}>
+              <Select defaultValue='active' required onChange={handleSecondChange}>
                 {
                   perihal && perihal.length > 0 ?
                   perihal.map((p) => (
@@ -240,7 +290,7 @@ const TabAccount = () => {
           <Grid item xs={12} sm={6}>
             <InputLabel>PERIHAL</InputLabel>
             <FormControl fullWidth>
-              <Select label='Keluhan' defaultValue='active'>
+              <Select label='Keluhan' required defaultValue='active' onChange={(e) => setIdJenisComplain(e.target.value)}>
                 {
                   jenisComplain && jenisComplain.length > 0 ?
                   jenisComplain.map((jc) => (
@@ -256,6 +306,7 @@ const TabAccount = () => {
             <TextField
               fullWidth
               multiline
+              required
               minRows={3}
               placeholder='Silahkan tulis detail complain seperti : npm, nidn, nama grup kelas dan lain lain...'
               sx={{ '& .MuiOutlinedInput-root': { alignItems: 'baseline' } }}
