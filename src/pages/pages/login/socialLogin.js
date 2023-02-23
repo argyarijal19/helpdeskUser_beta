@@ -7,63 +7,60 @@ import Swal from 'sweetalert2'
 
 const ButtonLogin = () => {
   const router = useRouter()
-    const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
-    const onSuccess = (response) => {
-      console.log(response)
-      const picture = response.data.picture
-      var data = {
-        "email": response.data.email
-      };
-      const config = {
-        method: 'post',
-        url: 'https://helpdesk_backend.ulbi.ac.id/login',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        data : data
-      }
-      axios(config).then((response) => {
-        console.log(response)
+  const clientId = '671214379595-kckkb751edf08ij8b0kv92gfqm2ji02h.apps.googleusercontent.com'
+  const onSuccess = response => {
+    console.log(response)
+    const picture = response.data.picture
+    var data = {
+      email: response.data.email
+    }
+    const config = {
+      method: 'post',
+      url: 'https://helpdesk_backend.ulbi.ac.id/login',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    }
+    console.log(data)
+    axios(config)
+      .then(response => {
         const status = response.data.status
         const token = response.data.token
-        if(status === 1){
+        if (status === 1) {
           localStorage.setItem('auth', token)
           localStorage.setItem('picture', picture)
           router.push('/dashboard')
-        }else{
+        } else {
           const message = response.data.message
           Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: message,
+            text: message
           })
         }
-      }).catch((err) => {
+      })
+      .catch(err => {
         console.log(err)
       })
-    };
-    // const onFailure = (response) => console.log(response);
-    return (
-        <LoginSocialGoogle 
-        client_id={clientId}
-        scope='openid profile email'
-        discoveryDocs='claims_supported'
-        access_type='offline'
-        onResolve={onSuccess}
-        onReject={(err) => {
-          console.log(err);
-        }}
-            >
-            <Button
-              fullWidth
-              size='large'
-              variant='contained'
-              sx={{ marginBottom: 7 }}
-            >
-              Login With Google Account
-            </Button>
-        </LoginSocialGoogle>
-    )
+  }
+  // const onFailure = (response) => console.log(response);
+  return (
+    <LoginSocialGoogle
+      client_id={clientId}
+      scope='openid profile email'
+      discoveryDocs='claims_supported'
+      access_type='offline'
+      onResolve={onSuccess}
+      onReject={err => {
+        console.log(err)
+      }}
+    >
+      <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }}>
+        Login With Google Account
+      </Button>
+    </LoginSocialGoogle>
+  )
 }
 
 export default ButtonLogin

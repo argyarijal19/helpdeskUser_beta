@@ -60,7 +60,7 @@ const TabAccount = () => {
   // ** State
   const [openAlert, setOpenAlert] = useState(true)
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
-  const [perihal, setPerihal] = useState([]);
+  const [perihal, setPerihal] = useState([])
   const [counter, setCounter] = useState(1)
   const [department, setDepartment] = useState([])
   const [idDepartment, setIdDepartment] = useState(0)
@@ -69,16 +69,18 @@ const TabAccount = () => {
   const [idJenisComplain, setIdJenisComplain] = useState(0)
   const [namaLengkap, setNamaLengkap] = useState('')
   const [jabatan, setjabatan] = useState('')
-  const [idUser,setIdUser] = useState('')
+  const [idUser, setIdUser] = useState('')
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState('')
   const [keterangan, setKeterangan] = useState('')
   const [priority, setPriority] = useState(0)
 
   useEffect(() => {
     const token = localStorage.getItem('auth')
-    if(!token){
+    if (!token) {
       const router = useRouter()
       router.push('/401')
-    }else{
+    } else {
       const decode = jwt_decode(token)
       const baseData = JSON.parse(decode.sub)
       setNamaLengkap(baseData.nama_lengkap)
@@ -86,73 +88,78 @@ const TabAccount = () => {
       const config = {
         method: 'get',
         url: 'https://helpdesk_backend.ulbi.ac.id/get_department',
-        headers: {  
+        headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin':'*'
-        },
+          'Access-Control-Allow-Origin': '*'
+        }
       }
-      axios(config).then((response) => {
+      axios(config).then(response => {
         setDepartment(response.data.data)
       })
       var configJabatan = {
         method: 'get',
         url: `https://helpdesk_backend.ulbi.ac.id/id_jabatan/${baseData.id_jabatan}`,
-        headers: { 
-          'Authorization': `Bearer ${token}`, 
+        headers: {
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
-      };
+      }
       axios(configJabatan)
-      .then(function (response) {
-        setjabatan(response.data.data[0].nama_jabatan)
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+        .then(function (response) {
+          setjabatan(response.data.data[0].nama_jabatan)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
-  },[])
+  }, [])
 
-  const handleFirstChange = (event) => {
+  const handleFirstChange = event => {
     const value = event.target.value
     setIdDepartment(value)
 
     const configPerihal = {
       method: 'get',
       url: `https://helpdesk_backend.ulbi.ac.id/get_apps_base?id_department=${value}`,
-      headers: {  
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin':'*'
-      },
+        'Access-Control-Allow-Origin': '*'
+      }
     }
-    axios(configPerihal).then((response) => {
-      setPerihal(response.data.data)
-    }).catch(err =>{
-      console.log(err)
-    })
+    axios(configPerihal)
+      .then(response => {
+        setPerihal(response.data.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     setPerihal('')
   }
 
-  const handleSecondChange = (event) =>{
+  const handleSecondChange = event => {
     const value = event.target.value
     setIdPerihal(value)
     console.log(value)
     const configjenisTask = {
       method: 'get',
       url: `https://helpdesk_backend.ulbi.ac.id/jt_byapp?id_aplikasi=${value}`,
-      headers: {  
+      headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin':'*'
-      },
+        'Access-Control-Allow-Origin': '*'
+      }
     }
-    axios(configjenisTask).then((response) => {
-      setJenisComplain(response.data.data)
-    }).catch(err =>{
-      console.log(err)
-    })
+    axios(configjenisTask)
+      .then(response => {
+        setJenisComplain(response.data.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     setJenisComplain('')
   }
   const onChange = file => {
-    const fileUpload = file.target.files[0];
+    const fileUpload = file.target.files[0]
+    setFile(fileUpload)
     const reader = new FileReader()
     const { files } = file.target
     if (files && files.length !== 0) {
@@ -161,7 +168,7 @@ const TabAccount = () => {
       reader.readAsDataURL(fileUpload)
     }
   }
-  const handleAdd = () =>{
+  const handleAdd = () => {
     setCounter(counter + 1)
     console.log(counter)
   }
@@ -174,7 +181,7 @@ const TabAccount = () => {
       minWidth: 67
     }
   }))
-  
+
   const TabName = styled('span')(({ theme }) => ({
     lineHeight: 1.71,
     fontSize: '0.875rem',
@@ -183,59 +190,78 @@ const TabAccount = () => {
       display: 'none'
     }
   }))
-  
-  const handleSave = (e) => {
+
+  const handleSave = e => {
     e.preventDefault()
     const token = localStorage.getItem('auth')
     const decode = jwt_decode(token)
     const baseData = JSON.parse(decode.sub)
     console.log(keterangan)
     // simpan content ke database atau kirim ke server
-    if (keterangan === '' || idDepartment == 0 || idJenisComplain === 0 || idPerihal === 0 || priority === 0){
+    if (keterangan === '' || idDepartment == 0 || idJenisComplain === 0 || idPerihal === 0 || priority === 0) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Form Masih ada yang kosong',
+        text: 'Form Masih ada yang kosong'
       })
     }
+    const formData = new FormData()
+    formData.append('file', file)
+    const configFile = {
+      method: 'post',
+      url: 'https://helpdesk_backend.ulbi.ac.id/post_task_attachment',
+      header: {
+        'Content-Type': 'multipart/form-data'
+      },
+      data: formData
+    }
+    axios(configFile)
+      .then(response => {
+        console.log(response.data)
+        setFileName(response.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     var data = {
-      "id_user_comp": baseData.id_user,
-      "id_aplikasi": idPerihal,
-      "id_jabatan": baseData.id_jabatan,
-      "id_jenis_task": idJenisComplain,
-      "id_department": idDepartment,
-      "priority": priority,
-      "keterangan": keterangan
-    };
-    console.log(data)
-    
+      id_user_comp: baseData.id_user,
+      id_aplikasi: idPerihal,
+      id_jabatan: baseData.id_jabatan,
+      id_jenis_task: idJenisComplain,
+      id_department: idDepartment,
+      priority: priority,
+      keterangan: keterangan,
+      attachment: fileName
+    }
+    console.log(imgSrc)
+
     var config = {
       method: 'post',
       url: 'https://helpdesk_backend.ulbi.ac.id/post_task',
-      headers: { 
-        'Authorization': `Bearer ${token}`, 
+      headers: {
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      data : data
-    };
-    
+      data: data
+    }
+
     axios(config)
-    .then(function (response) {
-      const cek = response.data.status;
-      if (cek === 1){
-        Swal.fire({
-          icon: 'success',
-          title: 'okeey...',
-          text: response.data.message,
-        })
-      }else{
-        console.log(response)
-      }
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-  };
+      .then(function (response) {
+        const cek = response.data.status
+        if (cek === 1) {
+          Swal.fire({
+            icon: 'success',
+            title: 'okeey...',
+            text: response.data.message
+          })
+        } else {
+          console.log(response)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+  }
 
   return (
     <CardContent>
@@ -247,15 +273,21 @@ const TabAccount = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <InputLabel>NAMA LENGKAP</InputLabel>
-            <TextField fullWidth label={namaLengkap} disabled InputProps={{ readOnly: true }} defaultValue={namaLengkap} />
+            <TextField
+              fullWidth
+              label={namaLengkap}
+              disabled
+              InputProps={{ readOnly: true }}
+              defaultValue={namaLengkap}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-          <InputLabel>PRIORITAS</InputLabel>
+            <InputLabel>PRIORITAS</InputLabel>
             <FormControl fullWidth>
-              <Select label='Department' defaultValue='' required onChange={(e) => setPriority(e.target.value)}>
-                  <MenuItem value={2}>Low</MenuItem>
-                  <MenuItem value={4}>Medium</MenuItem>
-                  <MenuItem value={6}>High</MenuItem>
+              <Select label='Department' defaultValue='' required onChange={e => setPriority(e.target.value)}>
+                <MenuItem value={2}>Low</MenuItem>
+                <MenuItem value={4}>Medium</MenuItem>
+                <MenuItem value={6}>High</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -263,13 +295,9 @@ const TabAccount = () => {
             <InputLabel>DEPARTMENT</InputLabel>
             <FormControl fullWidth>
               <Select label='Department' defaultValue='' required onChange={handleFirstChange}>
-                {
-                  department && department.length > 0 ?
-                  department.map((d) => (
-                    <MenuItem value={d.id_department}>{d.nama_department.toUpperCase()}</MenuItem>
-                  )):
-                  'None'
-                }
+                {department && department.length > 0
+                  ? department.map(d => <MenuItem value={d.id_department}>{d.nama_department.toUpperCase()}</MenuItem>)
+                  : 'None'}
               </Select>
             </FormControl>
           </Grid>
@@ -277,29 +305,25 @@ const TabAccount = () => {
             <InputLabel>KELUHAN</InputLabel>
             <FormControl fullWidth>
               <Select defaultValue='active' required onChange={handleSecondChange}>
-                {
-                  perihal && perihal.length > 0 ?
-                  perihal.map((p) => (
-                    <MenuItem value={p.id_aplikasi}>{p.nama_aplikasi}</MenuItem>
-                    )):
-                    <MenuItem value=''>Pilih Department</MenuItem>
-                }
+                {perihal && perihal.length > 0 ? (
+                  perihal.map(p => <MenuItem value={p.id_aplikasi}>{p.nama_aplikasi}</MenuItem>)
+                ) : (
+                  <MenuItem value=''>Pilih Department</MenuItem>
+                )}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <InputLabel>PERIHAL</InputLabel>
             <FormControl fullWidth>
-              <Select label='Keluhan' required defaultValue='active' onChange={(e) => setIdJenisComplain(e.target.value)}>
-                {
-                  jenisComplain && jenisComplain.length > 0 ?
-                  jenisComplain.map((jc) => (
-                    <MenuItem value={jc.id_jenis_task}>{jc.jenis_task}</MenuItem>
-                    )) :
+              <Select label='Keluhan' required defaultValue='active' onChange={e => setIdJenisComplain(e.target.value)}>
+                {jenisComplain && jenisComplain.length > 0 ? (
+                  jenisComplain.map(jc => <MenuItem value={jc.id_jenis_task}>{jc.jenis_task}</MenuItem>)
+                ) : (
                   <MenuItem value=''>Pilih Keluhan</MenuItem>
-                }
+                )}
               </Select>
-            </FormControl>            
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
             <InputLabel>DETAIL COMPLAIN</InputLabel>
@@ -310,7 +334,7 @@ const TabAccount = () => {
               minRows={3}
               placeholder='Silahkan tulis detail complain seperti : npm, nidn, nama grup kelas dan lain lain...'
               sx={{ '& .MuiOutlinedInput-root': { alignItems: 'baseline' } }}
-              onChange={(e) => setKeterangan(e.target.value)}
+              onChange={e => setKeterangan(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -322,47 +346,52 @@ const TabAccount = () => {
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
             <TabList
-            aria-label='account-settings tabs'
-            sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
-          >
-            
-            <Tab
-              value='account'
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <TabName>Upload Attachment</TabName>
+              aria-label='account-settings tabs'
+              sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
+            >
+              <Tab
+                value='account'
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TabName>Upload Attachment</TabName>
+                  </Box>
+                }
+              />
+            </TabList>
+            {Array.from(Array(counter)).map((c, index) => {
+              return (
+                <Box p={5} key={c} sx={{ display: 'flex', alignItems: 'center' }}>
+                  <ImgStyled src={imgSrc} alt='Profile Pic' />
+                  <Box>
+                    <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
+                      Upload Attachment
+                      <input
+                        hidden
+                        type='file'
+                        onChange={onChange}
+                        accept='image/png, image/jpeg'
+                        id='account-settings-upload-image'
+                      />
+                    </ButtonStyled>
+                    <ResetButtonStyled
+                      color='error'
+                      variant='outlined'
+                      onClick={() => setImgSrc('/images/avatars/1.png')}
+                    >
+                      Reset
+                    </ResetButtonStyled>
+                    <Typography variant='body2' sx={{ marginTop: 5 }}>
+                      Allowed PNG or JPEG. Max size of 800K.
+                    </Typography>
+                  </Box>
+                  <ResetButtonStyled color='primary' variant='outlined' onClick={() => setCounter(counter - 1)}>
+                    -
+                  </ResetButtonStyled>
                 </Box>
-              }
-            />
-          </TabList>
-            {Array.from(Array(counter)).map((c,index) =>{
-              return <Box p={5} key={c} sx={{ display: 'flex', alignItems: 'center' }}>
-              <ImgStyled src={imgSrc} alt='Profile Pic' />
-              <Box>
-                <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
-                  Upload Attachment
-                  <input
-                    hidden
-                    type='file'
-                    onChange={onChange}
-                    accept='image/png, image/jpeg'
-                    id='account-settings-upload-image'
-                  />
-                </ButtonStyled>
-                <ResetButtonStyled color='error' variant='outlined' onClick={() => setImgSrc('/images/avatars/1.png')}>
-                  Reset
-                </ResetButtonStyled>
-                <Typography variant='body2' sx={{ marginTop: 5 }}>
-                  Allowed PNG or JPEG. Max size of 800K.
-                </Typography>
-              </Box>
-              <ResetButtonStyled color='primary' variant='outlined' onClick={() => setCounter(counter - 1)}>
-                -
-              </ResetButtonStyled>
-            </Box>
+              )
             })}
             <ResetButtonStyled color='primary' variant='outlined' onClick={handleAdd}>
-                +
+              +
             </ResetButtonStyled>
           </Grid>
           <Grid item xs={12}>
