@@ -216,14 +216,14 @@ const TabAccount = () => {
       data: formData
     }
     axios(configFile)
-      .then(response => {
-        console.log(response.data)
+      .then((response) => {
         setFileName(response.data)
       })
       .catch(err => {
         console.log(err)
       })
-    var data = {
+      
+    const data = {
       id_user_comp: baseData.id_user,
       id_aplikasi: idPerihal,
       id_jabatan: baseData.id_jabatan,
@@ -234,6 +234,7 @@ const TabAccount = () => {
       attachment: fileName
     }
     console.log(imgSrc)
+    console.log(data)
 
     var config = {
       method: 'post',
